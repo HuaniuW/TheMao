@@ -149,8 +149,6 @@ cc.Class({
                         break;
                     case cc.KEY.up:
                         self.accJump = true;
-                        cc.log(">>>>>");
-                        //我去 啊洗吧
                         break;
                 }
             },
