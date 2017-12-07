@@ -11,6 +11,7 @@ cc.Class({
         _speed:null,
         _isInAir:false,
         _jumpChushiSD:-1000
+
         // foo: {
         //    default: null,      // The default value will be used only when the component attaching
         //                           to a node for the first time
@@ -31,7 +32,9 @@ cc.Class({
         this.accJumping = false;
         this.accJumpUping = false;
         this.accJumpDowning = false;
-        this.isJump = false;
+        // this.isJump = false;
+
+       
     },
     runLeft:function(){
         if(!this.accLefting){
@@ -56,6 +59,9 @@ cc.Class({
         // this.body.linearDamping = 10;
         // cc.log("linearDamping> "+this.body.linearDamping);
 
+        this.isPa = false;
+        this.isPaing = false;
+        this.isPaTiaoing = false;
 
         this.armatureDisplay = this.getComponent(dragonBones.ArmatureDisplay);
         
@@ -192,6 +198,18 @@ cc.Class({
         //1.控制跳跃 2.碰撞地板的方位 3.判断是否在空中 4.动作判断
 
 
+        if(this.isPa){
+            if(!this.isPaing){
+                this.isPaing = true;
+                cc.log(">>>>>>>>>>");
+                // this.armature.animation.gotoAndStop("paQiang",1);
+                this.armature.animation.gotoAndPlay("paQiang",0,0.06,1);
+            }
+        }
+
+        
+
+
         if(this.accJump){
             if(!this._isInAir){
                 this._isInAir = true;
@@ -209,7 +227,6 @@ cc.Class({
 
         if(this.accJumping){
             this.jump();
-            
         }
 
         if(this.accLeft){
@@ -226,11 +243,13 @@ cc.Class({
             if(this._speed.x>-this.maxSpeed)this._speed.x+=-this.minSpeed-this.jiasudu*dt;
             
         }else if(this.accRight){
+            
             if(this.node.scaleX > 0) {
                 this.node.scaleX *= -1;
             }
             if(!this.accRighting&&!this.accJumping){
                 this.reSet();
+                cc.log(">>>>>>>>>>>>");
                 this.accRighting = true;
                 this.armature.animation.gotoAndPlay("run",0);
             }
@@ -248,6 +267,16 @@ cc.Class({
         }
         
         this.body.linearVelocity = this._speed;
+
+        
+
+        if(!this.isPaing&&!this.isPaTiaoing){
+            if(this._speed.y == 0){
+                // cc.log("this._speed   "+this._speed);    
+                this._isInAir = false;
+                this.isJump = false;
+            }
+        }
 
         // cc.log(this.armature.animation.isCompleted);
     },
@@ -291,12 +320,24 @@ cc.Class({
                 // cc.log("触地 刷新跳跃");      
                 this._isInAir = false;
                 this.isJump = false;
+                this.isPa = false;
+                this.isPaing = false;
+                this.isPaTiaoing = false;
+                this.accJumping = false;
+                cc.log("落在里面 ");
             }
-            cc.log("落在里面 ");
+            
         }else{
             if(sy<=oy+oh*0.5){
+                if(!this.isPa)this.isPa = true;
                 cc.log("碰到侧边");
+                if(sx<ox-ow*0.5){
+                    cc.log("碰到左边");
+                }else if(sx>ox+ow*0.5){
+                    cc.log("碰到右边");
+                }
             }
+            
             
         }
         // cc.log(otherCollider.node.x);
