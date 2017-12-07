@@ -5,12 +5,12 @@ cc.Class({
         t1:100,
         minSpeed:100,
         maxSpeed:400,
-        jiajumppower:100,
-        maxJumpPower:1000,
-        _jumpPower:100,
+        jiajumppower:300,
+        maxJumpPower:1400,
         jiasudu:10,
         _speed:null,
-        _isInAir:false
+        _isInAir:false,
+        _jumpChushiSD:-1000
         // foo: {
         //    default: null,      // The default value will be used only when the component attaching
         //                           to a node for the first time
@@ -148,7 +148,10 @@ cc.Class({
                         self.accRight = true;
                         break;
                     case cc.KEY.up:
-                        self.accJump = true;
+                        if(!self.isJump){
+                            self.accJump = true;
+                        }
+
                         break;
                 }
             },
@@ -165,14 +168,9 @@ cc.Class({
                         break;
                     case cc.KEY.up:
                         self.accJump = false;
-                        // self.accJumping = false;
-                        if(!self._isInAir){
-                            self._isInAir = true;
-                            self.isJump = true;
-                            self._speed.y = self._jumpPower;
-                            self.body.linearVelocity = self._speed;
-                            self._jumpPower = 100;
-                        }
+                        self.accJumping = false;
+                        if(self._isInAir)self.isJump = true;
+                        this._jumpChushiSD = -1000;
                         break;  
                 }
             }
@@ -195,18 +193,23 @@ cc.Class({
 
 
         if(this.accJump){
-            if(!this.isJump){   
-                // cc.log("self._jumpPower>>>>  "+this._jumpPower);
-                this._jumpPower+=(this.maxJumpPower-this._jumpPower)*0.16;
-                // if(this._jumpPower<this.maxJumpPower){
-                //     this._jumpPower+=this.jiajumppower;
-                
-                // }
+            if(!this._isInAir){
+                this._isInAir = true;
             }
+            
+            this._speed.y+=this.jiajumppower;
+
+            if(this._speed.y>=this.maxJumpPower){
+                cc.log("_speed    "+this._speed.y+"  ---  "+this.maxJumpPower);
+                this.accJump = false;
+                this.isJump = true;
+            }
+            
         }
 
         if(this.accJumping){
             this.jump();
+            
         }
 
         if(this.accLeft){
@@ -214,6 +217,7 @@ cc.Class({
                 this.node.scaleX *= -1;   
             }
             
+
             if(!this.accLefting&&!this.accJumping){
                 this.reSet();
                 this.accLefting = true;
@@ -251,14 +255,8 @@ cc.Class({
         // cc.log("碰撞");
     },
     onBeginContact: function (contact, selfCollider, otherCollider) {
-        // cc.log("begin 测试"+contact + "    s y >  "+selfCollider.node.y+" o y >  "+otherCollider.node.y+"     摩擦力 "+selfCollider.friction+"  name "+selfCollider.name);
-        // cc.log("自己的宽高 "+selfCollider.node.width+"   "+selfCollider.getAABB().width);
-        // cc.log("自己的X "+selfCollider.node.x+"   "+selfCollider.getAABB().x);
-        // cc.log("被碰撞物体的宽高  "+otherCollider.node.width+"    "+otherCollider.getAABB().width);
-
-
+        //碰撞开始调用
         
-      
         // contact.disabled = true; 不产生物理效果
         // otherCollider.node.tests();
     },
@@ -267,8 +265,13 @@ cc.Class({
     },
     onPreSolve ( contact  ,selfCollider  ,otherCollider ){
         //接触时不停调用
-        // cc.log(otherCollider.node.x);
+        // cc.log("begin 测试"+contact + "    s y >  "+selfCollider.node.y+" o y >  "+otherCollider.node.y+"     摩擦力 "+selfCollider.friction+"  name "+selfCollider.name);
+        // cc.log("自己的宽高 "+selfCollider.node.width+"   "+selfCollider.getAABB().width);
+        // cc.log("自己的X "+selfCollider.node.x+"   "+selfCollider.getAABB().x);
+        // cc.log("被碰撞物体的宽高  "+otherCollider.node.width+"    "+otherCollider.getAABB().width);
 
+
+        
         let sy = selfCollider.getAABB().y;
         let sw = selfCollider.getAABB().width;
         let sx = selfCollider.getAABB().x-sw*0.5;
@@ -289,13 +292,14 @@ cc.Class({
                 this._isInAir = false;
                 this.isJump = false;
             }
-            // cc.log("落在里面 ");
+            cc.log("落在里面 ");
         }else{
             if(sy<=oy+oh*0.5){
-                // cc.log("碰到侧边");
+                cc.log("碰到侧边");
             }
             
         }
+        // cc.log(otherCollider.node.x);
     },
     onPostSolve ( contact , selfCollider,  otherCollider ){
         //不停接触完后调用

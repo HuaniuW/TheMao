@@ -2213,11 +2213,11 @@
     "minSpeed": 100,
     "maxSpeed": 400,
     "jiajumppower": 100,
-    "maxJumpPower": 1000,
-    "_jumpPower": 100,
+    "maxJumpPower": 800,
     "jiasudu": 10,
     "_speed": null,
-    "_isInAir": false
+    "_isInAir": false,
+    "_jumpChushiSD": 0
   },
   {
     "__type__": "cc.Node",
